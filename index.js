@@ -16,10 +16,10 @@ function getMediaLocation(url,callback){
 	
 }
 
-function rawPlay(url){
+function rawPlay(url,time){
 	console.log("starting new player");
 	killPlayer();
-	var child = spawn('omxplayer', ['-b','-o','hdmi',url]);
+	var child = spawn('omxplayer', ['-b','-o','hdmi','-l',time,url]);
 	currentPlayer = child;
 	currentPlayer.on("exit",function(){
 		currentPlayer = false;
@@ -37,19 +37,19 @@ function killPlayer(){
 	}
 }
 
-function playMedia(url,done){
+function playMedia(url,time){
 	getMediaLocation(url,function(path){
-		rawPlay(path);
+		rawPlay(path,time);
 	});
 }
 
-function playVimeo(id){
+function playVimeo(id,time){
 
 	function parseBody(body){
 		try {
 			var obj = JSON.parse(body);
 			var files = obj.request.files; //console.log(obj.request.files);
-			rawPlay(files.h264.sd.url);
+			rawPlay(files.h264.sd.url,time);
 		} catch(e) {
 			console.error(e);
 		}
@@ -79,10 +79,10 @@ function playVimeo(id){
 
 function handleVideo(data){
 	if(data.video.videotype == "yt"){
-		playMedia("https://www.youtube.com/watch?v="+data.video.videoid);
+		playMedia("https://www.youtube.com/watch?v="+data.video.videoid, data.time);
 	}
 	if(data.video.videotype == "vimeo"){
-		playVimeo(data.video.videoid);
+		playVimeo(data.video.videoid, data.time);
 	}
 }
 
